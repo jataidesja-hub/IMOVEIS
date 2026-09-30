@@ -118,12 +118,21 @@ export default async function ImovelPublicoPage({
                 </div>
               )}
 
-              <div className="flex items-center gap-1 text-slate-500 mt-4">
-                <MapPin size={16} className="text-green-600" />
-                <span className="text-sm">
-                  {[im.endereco, im.numero, im.complemento, im.bairro, im.cidade, im.estado, im.cep]
-                    .filter(Boolean).join(', ')}
-                </span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
+                <div className="flex items-start gap-1 text-slate-500">
+                  <MapPin size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">
+                    {[im.endereco, im.numero, im.complemento, im.bairro, im.cidade, im.estado, im.cep]
+                      .filter(Boolean).join(', ')}
+                  </span>
+                </div>
+                {im.link_mapa && (
+                  <a href={im.link_mapa.startsWith('http') ? im.link_mapa : `https://${im.link_mapa}`} 
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0">
+                    <MapPin size={14} /> Ver no Mapa
+                  </a>
+                )}
               </div>
 
               {/* Key features */}

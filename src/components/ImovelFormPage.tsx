@@ -30,7 +30,7 @@ export default function ImovelFormPage({ modo }: Props) {
   const [form, setForm] = useState({
     titulo: '', descricao: '', tipo: 'casa', finalidade: 'venda',
     preco: '', preco_condominio: '', preco_iptu: '',
-    endereco: '', numero: '', complemento: '', bairro: '', cidade: '', estado: 'SP', cep: '',
+    endereco: '', numero: '', complemento: '', bairro: '', cidade: '', estado: 'SP', cep: '', link_mapa: '',
     quartos: '0', suites: '0', banheiros: '0', vagas_garagem: '0',
     area_total: '', area_construida: '',
     publicado: false, destaque: false,
@@ -55,6 +55,7 @@ export default function ImovelFormPage({ modo }: Props) {
           cidade: data.cidade || '',
           estado: data.estado || 'SP',
           cep: data.cep || '',
+          link_mapa: data.link_mapa || '',
           quartos: String(data.quartos),
           suites: String(data.suites),
           banheiros: String(data.banheiros),
@@ -145,6 +146,7 @@ export default function ImovelFormPage({ modo }: Props) {
         cidade: form.cidade,
         estado: form.estado,
         cep: form.cep,
+        link_mapa: form.link_mapa,
         quartos: Number(form.quartos),
         suites: Number(form.suites),
         banheiros: Number(form.banheiros),
@@ -306,6 +308,12 @@ export default function ImovelFormPage({ modo }: Props) {
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
                 {estados.map(e => <option key={e} value={e}>{e}</option>)}
               </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Link do Google Maps</label>
+              <input name="link_mapa" value={form.link_mapa} onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Cole o link do Google Maps (compartilhar > copiar link)" />
             </div>
           </div>
         </div>

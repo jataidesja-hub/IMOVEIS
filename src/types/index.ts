@@ -50,6 +50,7 @@ export interface Imovel {
   cidade: string;
   estado: string;
   cep?: string;
+  link_mapa?: string;
   latitude?: number;
   longitude?: number;
   quartos: number;
@@ -81,6 +82,7 @@ export interface ImovelFormData {
   cidade: string;
   estado: string;
   cep?: string;
+  link_mapa?: string;
   quartos: number;
   suites: number;
   banheiros: number;
