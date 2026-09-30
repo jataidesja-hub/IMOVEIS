@@ -125,7 +125,7 @@ export default function GestorCorretorDetalhe() {
                 {corretor.creci && <p className="text-sm text-slate-600">CRECI: {corretor.creci}</p>}
                 {corretor.bio && <p className="text-sm text-slate-500 italic">{corretor.bio}</p>}
                 <a
-                  href={`${siteUrl}/c/${corretor.slug}`}
+                  href={`/c/${corretor.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700 mt-2"

@@ -67,7 +67,7 @@ export default function GestorLayout({ children }: { children: React.ReactNode }
 
           <div className="p-4 border-t border-slate-700 space-y-2">
             <a
-              href={`${siteUrl}/c`}
+              href="/c"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
