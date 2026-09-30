@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { Imovel, CorretorComPerfil } from '@/types';
 import { formatCurrency, tipoLabel, buildWhatsAppLink, formatArea } from '@/lib/utils';
 import Image from 'next/image';
+import ImageGallery from '@/components/ImageGallery';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -81,28 +82,7 @@ export default async function ImovelPublicoPage({
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Photo Gallery */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 mb-6">
-              {(im.fotos || []).length > 0 ? (
-                <div className="relative">
-                  <div className="relative h-72 sm:h-96">
-                    <Image src={(im.fotos || [])[0]} alt={im.titulo} fill className="object-cover" />
-                  </div>
-                  {(im.fotos || []).length > 1 && (
-                    <div className="grid grid-cols-4 gap-1 p-1">
-                      {(im.fotos || []).slice(1, 5).map((foto, i) => (
-                        <div key={i} className="relative h-24">
-                          <Image src={foto} alt="" fill className="object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="h-72 flex items-center justify-center bg-gray-100">
-                  <Building2 className="w-20 h-20 text-gray-300" />
-                </div>
-              )}
-            </div>
+            <ImageGallery fotos={im.fotos} titulo={im.titulo} />
 
             {/* Title & Price */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
