@@ -17,7 +17,7 @@ export default function EsqueciSenhaPage() {
     setCarregando(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/redefinir-senha`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`,
       });
       if (error) throw error;
       setEnviado(true);
