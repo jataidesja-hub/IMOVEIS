@@ -90,12 +90,16 @@ export default function ImovelFormPage({ modo }: Props) {
         fd.append('pasta', 'imoveis');
         const res = await fetch('/api/upload', { method: 'POST', body: fd });
         const data = await res.json();
-        if (data.url) urls.push(data.url);
+        if (data.url) {
+          urls.push(data.url);
+        } else {
+          throw new Error(data.error || 'Falha ao receber URL da imagem');
+        }
       }
       setFotos(p => [...p, ...urls]);
       toast.success(`${urls.length} foto(s) adicionada(s)`);
-    } catch {
-      toast.error('Erro ao fazer upload das fotos');
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao fazer upload das fotos');
     } finally {
       setUploadando(false);
       e.target.value = '';

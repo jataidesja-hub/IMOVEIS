@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: result.secure_url, public_id: result.public_id });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro upload Cloudinary:', error);
-    return NextResponse.json({ error: 'Erro ao fazer upload' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Erro ao fazer upload' }, { status: 500 });
   }
 }
