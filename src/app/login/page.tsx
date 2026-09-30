@@ -49,8 +49,6 @@ export default function LoginPage() {
       } else {
         router.push('/');
       }
-
-      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro ao fazer login';
       toast.error(msg === 'Invalid login credentials' ? 'Email ou senha incorretos' : msg);
