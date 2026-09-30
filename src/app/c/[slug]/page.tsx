@@ -6,33 +6,46 @@ import Image from 'next/image';
 import { Building2, MapPin, Bed, Bath, Car, Ruler, Phone, ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CatalogoCorretorPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const supabase = await createServerSupabaseClient();
+  try {
+    const { slug } = await params;
+    const supabase = await createServerSupabaseClient();
 
-  const { data: corretor } = await supabase
-    .from('corretores')
-    .select('*, perfil:perfis(*)')
-    .eq('slug', slug)
-    .eq('ativo', true)
-    .eq('status', 'aprovado')
-    .single();
+    const { data: corretor, error } = await supabase
+      .from('corretores')
+      .select('*, perfil:perfis(*)')
+      .eq('slug', slug)
+      .eq('ativo', true)
+      .eq('status', 'aprovado')
+      .single();
 
-  if (!corretor) notFound();
+    if (error && error.code !== 'PGRST116') {
+      throw new Error('Supabase error: ' + error.message);
+    }
 
-  const { data: imoveis } = await supabase
-    .from('imoveis')
-    .select('*')
-    .eq('corretor_id', corretor.id)
-    .eq('publicado', true)
-    .order('destaque', { ascending: false })
-    .order('created_at', { ascending: false });
+    if (!corretor) return (
+      <div className="p-10 text-center">
+        <h2>Corretor não encontrado: {slug}</h2>
+        <Link href="/c" className="text-blue-500">Voltar</Link>
+      </div>
+    );
 
-  const c = corretor as CorretorComPerfil;
+    const { data: imoveis } = await supabase
+      .from('imoveis')
+      .select('*')
+      .eq('corretor_id', corretor.id)
+      .eq('publicado', true)
+      .order('destaque', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    const c = corretor as CorretorComPerfil;
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,4 +133,13 @@ export default async function CatalogoCorretorPage({
       </div>
     </div>
   );
+  } catch (err: any) {
+    return (
+      <div className="p-10 text-center">
+        <h2>Erro Fatal na Renderização</h2>
+        <p className="text-red-500 font-mono text-xs">{err.message}</p>
+        <p className="text-gray-500 font-mono text-xs">{err.stack}</p>
+      </div>
+    );
+  }
 }

@@ -25,6 +25,8 @@ export default function Error({
         Ocorreu um erro ao carregar esta página. Pode ser uma instabilidade temporária.
       </p>
       <div className="bg-red-50 text-red-600 text-xs font-mono p-4 rounded-xl mb-6 max-w-md break-words text-left">
+        URL: {typeof window !== 'undefined' ? window.location.href : 'Servidor'}
+        <br/><br/>
         {error?.message || 'Erro desconhecido'}
         <br/><br/>
         Digest: {error?.digest || 'N/A'}
