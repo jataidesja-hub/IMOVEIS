@@ -37,6 +37,7 @@ export function generateCodigo(tipo: string): string {
 }
 
 export function formatWhatsApp(numero: string): string {
+  if (!numero) return '';
   return numero.replace(/\D/g, '');
 }
 

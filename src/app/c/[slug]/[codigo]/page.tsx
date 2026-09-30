@@ -82,14 +82,14 @@ export default async function ImovelPublicoPage({
           <div className="lg:col-span-2">
             {/* Photo Gallery */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 mb-6">
-              {im.fotos.length > 0 ? (
+              {(im.fotos || []).length > 0 ? (
                 <div className="relative">
                   <div className="relative h-72 sm:h-96">
-                    <Image src={im.fotos[0]} alt={im.titulo} fill className="object-cover" />
+                    <Image src={(im.fotos || [])[0]} alt={im.titulo} fill className="object-cover" />
                   </div>
-                  {im.fotos.length > 1 && (
+                  {(im.fotos || []).length > 1 && (
                     <div className="grid grid-cols-4 gap-1 p-1">
-                      {im.fotos.slice(1, 5).map((foto, i) => (
+                      {(im.fotos || []).slice(1, 5).map((foto, i) => (
                         <div key={i} className="relative h-24">
                           <Image src={foto} alt="" fill className="object-cover" />
                         </div>
@@ -188,11 +188,11 @@ export default async function ImovelPublicoPage({
             )}
 
             {/* Features */}
-            {im.caracteristicas.length > 0 && (
+            {(im.caracteristicas || []).length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                 <h2 className="font-semibold text-slate-800 mb-4">Características</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {im.caracteristicas.map((c, i) => (
+                  {(im.caracteristicas || []).map((c, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
                       <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
                       {c}
@@ -227,7 +227,7 @@ export default async function ImovelPublicoPage({
                     : <Building2 size={20} className="m-auto mt-4 text-slate-400" />}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800">{c.perfil.nome}</p>
+                  <p className="font-semibold text-slate-800">{c.perfil?.nome || 'Corretor'}</p>
                   {c.creci && <p className="text-xs text-slate-500">CRECI: {c.creci}</p>}
                   {c.bio && <p className="text-xs text-slate-400 mt-1">{c.bio}</p>}
                 </div>

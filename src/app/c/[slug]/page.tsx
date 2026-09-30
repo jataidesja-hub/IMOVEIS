@@ -61,12 +61,12 @@ export default async function CatalogoCorretorPage({
                 : <Building2 size={24} className="m-auto mt-4 text-slate-400" />}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">{c.perfil.nome}</h1>
+              <h1 className="text-xl font-bold text-slate-800">{c.perfil?.nome || 'Corretor'}</h1>
               {c.creci && <p className="text-sm text-slate-500">CRECI: {c.creci}</p>}
               {c.bio && <p className="text-sm text-slate-500 mt-1">{c.bio}</p>}
             </div>
             <a
-              href={`https://wa.me/55${c.whatsapp.replace(/\D/g, '')}`}
+              href={`https://wa.me/55${(c.whatsapp || '').replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="ml-auto flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors"
@@ -93,8 +93,8 @@ export default async function CatalogoCorretorPage({
               <Link key={im.id} href={`/c/${slug}/${im.codigo}`}
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
                 <div className="relative h-48 bg-gray-100">
-                  {im.fotos[0] ? (
-                    <Image src={im.fotos[0]} alt={im.titulo} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {(im.fotos || [])[0] ? (
+                    <Image src={(im.fotos || [])[0]} alt={im.titulo} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <Building2 className="w-12 h-12 text-gray-300" />
