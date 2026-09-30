@@ -67,12 +67,12 @@ export default function CadastroPage() {
 
       await supabase.auth.signOut();
       setSucesso(true);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao cadastrar';
+    } catch (err: any) {
+      const msg = err?.message || JSON.stringify(err) || 'Erro ao cadastrar';
       if (msg.includes('already registered')) {
         toast.error('Este email já está cadastrado');
       } else {
-        toast.error(msg);
+        toast.error(`Erro: ${msg}`);
       }
     } finally {
       setCarregando(false);

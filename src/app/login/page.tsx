@@ -47,9 +47,10 @@ export default function LoginPage() {
           router.push('/corretor');
         }
       } else {
-        router.push('/');
+        toast.error('Perfil não encontrado no banco! Verifique se a linha em perfis tem o mesmo ID do seu usuário.');
+        await supabase.auth.signOut();
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       const msg = err instanceof Error ? err.message : 'Erro ao fazer login';
       toast.error(msg === 'Invalid login credentials' ? 'Email ou senha incorretos' : msg);
     } finally {
