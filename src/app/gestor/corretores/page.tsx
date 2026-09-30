@@ -24,7 +24,26 @@ export default function GestorCorretoresPage() {
     setCarregando(false);
   }
 
-  useEffect(() => { carregarCorretores(); }, []);
+  useEffect(() => { 
+    carregarCorretores();
+
+    // Iniciar o modo tempo real (realtime)
+    const channel = supabase
+      .channel('corretores_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'corretores' },
+        (payload) => {
+          // Quando houver qualquer mudança (novo cadastro, etc), recarrega a lista
+          carregarCorretores();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   async function aprovar(id: string) {
     const { error } = await supabase.from('corretores').update({ status: 'aprovado' }).eq('id', id);
@@ -33,7 +52,7 @@ export default function GestorCorretoresPage() {
     // Send notification via API
     const corretor = corretores.find(c => c.id === id);
     if (corretor) {
-      await fetch('/api/notificar', {
+      const res = await fetch('/api/notificar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -43,6 +62,10 @@ export default function GestorCorretoresPage() {
           whatsapp: corretor.whatsapp,
         }),
       });
+      const data = await res.json();
+      if (data.wppLink) {
+        window.open(data.wppLink, '_blank');
+      }
     }
     carregarCorretores();
   }
