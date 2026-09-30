@@ -21,9 +21,14 @@ export default function Error({
         <Building2 className="w-8 h-8 text-red-600" />
       </div>
       <h2 className="text-2xl font-bold text-slate-800 mb-2">Ops! Algo deu errado</h2>
-      <p className="text-slate-500 mb-6 max-w-md">
+      <p className="text-slate-500 mb-2 max-w-md">
         Ocorreu um erro ao carregar esta página. Pode ser uma instabilidade temporária.
       </p>
+      <div className="bg-red-50 text-red-600 text-xs font-mono p-4 rounded-xl mb-6 max-w-md break-words text-left">
+        {error?.message || 'Erro desconhecido'}
+        <br/><br/>
+        Digest: {error?.digest || 'N/A'}
+      </div>
       <div className="flex gap-4">
         <button onClick={() => reset()} className="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-slate-700 font-semibold rounded-xl transition-colors">
           Tentar novamente
