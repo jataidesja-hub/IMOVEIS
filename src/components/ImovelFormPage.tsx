@@ -28,9 +28,12 @@ const CARACTERISTICAS_PADRAO = [
   'Semi-mobiliado', 'Pet-friendly', 'Acessível PcD'
 ];
 
-interface Props { modo: 'criar' | 'editar'; }
+interface Props { 
+  modo: 'criar' | 'editar';
+  retornoUrl?: string;
+}
 
-export default function ImovelFormPage({ modo }: Props) {
+export default function ImovelFormPage({ modo, retornoUrl = '/corretor/imoveis' }: Props) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createClient();
@@ -221,7 +224,7 @@ export default function ImovelFormPage({ modo }: Props) {
         toast.success('Imóvel atualizado!');
       }
 
-      router.push('/corretor/imoveis');
+      router.push(retornoUrl);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
@@ -234,7 +237,7 @@ export default function ImovelFormPage({ modo }: Props) {
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/corretor/imoveis" className="flex items-center gap-2 text-slate-500 hover:text-slate-700">
+        <Link href={retornoUrl} className="flex items-center gap-2 text-slate-500 hover:text-slate-700">
           <ArrowLeft size={18} /> Voltar
         </Link>
         <h1 className="text-2xl font-bold text-slate-800">

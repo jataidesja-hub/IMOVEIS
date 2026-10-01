@@ -12,9 +12,14 @@ export default async function GestorImoveisPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Todos os Imóveis</h1>
-        <p className="text-slate-500">{imoveis?.length || 0} imóveis no total</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Todos os Imóveis</h1>
+          <p className="text-slate-500">{imoveis?.length || 0} imóveis no total</p>
+        </div>
+        <a href="/gestor/imoveis/novo" className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2">
+          Adicionar Imóvel (Imobiliária)
+        </a>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -39,13 +44,18 @@ export default async function GestorImoveisPage() {
                   </p>
                   <p className="text-xs text-slate-400">Corretor: {im.corretor?.perfil?.nome}</p>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="font-semibold text-green-600">{formatCurrency(im.preco)}</p>
-                  <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    im.publicado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    {im.publicado ? 'Publicado' : 'Rascunho'}
-                  </span>
+                <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                  <div>
+                    <p className="font-semibold text-green-600">{formatCurrency(im.preco)}</p>
+                    <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      im.publicado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {im.publicado ? 'Publicado' : 'Rascunho'}
+                    </span>
+                  </div>
+                  <a href={`/gestor/imoveis/${im.id}/editar`} className="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors">
+                    Editar
+                  </a>
                 </div>
               </div>
             ))}
