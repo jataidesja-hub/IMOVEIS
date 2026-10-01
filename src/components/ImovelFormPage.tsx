@@ -7,6 +7,7 @@ import { generateCodigo, estadosBrasil, tipoLabel } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { Loader2, Save, ArrowLeft, Upload, X, Plus } from 'lucide-react';
 import Link from 'next/link';
+import FormMapaWrapper from '@/components/FormMapaWrapper';
 
 // Formata número como BRL ao digitar: "150000" → "1.500,00"
 function formatMoeda(raw: string): string {
@@ -415,22 +416,16 @@ export default function ImovelFormPage({ modo }: Props) {
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Cole o link do Google Maps (compartilhar > copiar link)" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Latitude Exata (opcional)</label>
-              <input name="latitude" value={form.latitude} onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="-9.398012" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Longitude Exata (opcional)</label>
-              <input name="longitude" value={form.longitude} onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="-40.501920" />
-            </div>
           </div>
-          <p className="text-xs text-slate-500 mt-4">
-            * O sistema tenta encontrar a localização no mapa automaticamente com base no endereço e cidade. Se ficar errado, você pode colar a latitude e longitude exatas acima.
-          </p>
+          
+          <div className="mt-6 pt-6 border-t border-slate-100">
+            <FormMapaWrapper 
+              lat={form.latitude} 
+              lng={form.longitude} 
+              onChange={(lat: string, lng: string) => setForm(p => ({ ...p, latitude: lat, longitude: lng }))}
+              enderecoBusca={form.cidade ? `${form.cidade}, ${form.estado}` : ''}
+            />
+          </div>
         </div>
 
         {/* Características físicas */}
