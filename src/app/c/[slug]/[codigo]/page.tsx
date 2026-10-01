@@ -59,6 +59,11 @@ export default async function ImovelPublicoPage({
     { label: 'CEP', value: im.cep || null },
     ...(im.preco_condominio ? [{ label: 'Condomínio', value: formatCurrency(im.preco_condominio) }] : []),
     ...(im.preco_iptu ? [{ label: 'IPTU/ano', value: formatCurrency(im.preco_iptu) }] : []),
+    // Calção extraído das caracteristicas
+    ...((im.caracteristicas || []).filter((c: string) => c.startsWith('Calção:')).map((c: string) => ({
+      label: 'Calção',
+      value: c.replace('Calção: ', ''),
+    }))),
   ].filter(d => d.value !== null);
 
   return (

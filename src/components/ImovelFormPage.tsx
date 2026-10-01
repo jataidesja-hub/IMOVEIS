@@ -41,7 +41,8 @@ export default function ImovelFormPage({ modo }: Props) {
 
   const [form, setForm] = useState({
     titulo: '', descricao: '', tipo: 'casa', finalidade: 'venda',
-    preco: '', preco_condominio: '', preco_iptu: '',
+    preco: '', preco_condominio: '', preco_iptu: '', preco_calcao: '',
+    tem_calcao: false,
     endereco: '', numero: '', complemento: '', bairro: '', cidade: '', estado: 'SP', cep: '', link_mapa: '',
     quartos: '0', suites: '0', banheiros: '0', vagas_garagem: '0',
     area_total: '', area_construida: '',
@@ -77,8 +78,13 @@ export default function ImovelFormPage({ modo }: Props) {
           publicado: data.publicado,
           destaque: data.destaque,
         });
+        const caracteristicas = data.caracteristicas || [];
+        const calcaoItem = caracteristicas.find((c: string) => c.startsWith('Calção:') || c === 'Calção exigido');
+        const calcaoValor = calcaoItem?.startsWith('Calção: R$ ') ? calcaoItem.replace('Calção: R$ ', '') : '';
+
         setFotos(data.fotos || []);
-        setCaracteristicasSelecionadas(data.caracteristicas || []);
+        setCaracteristicasSelecionadas(caracteristicas.filter((c: string) => !c.startsWith('Calção:')));
+        setForm(prev => ({ ...prev, tem_calcao: !!calcaoItem, preco_calcao: calcaoValor }));
       });
     }
   }, [modo, params.id]);
@@ -142,6 +148,15 @@ export default function ImovelFormPage({ modo }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Não autenticado');
 
+      // Adiciona calção às caracteristicas se marcado
+      let caracteristicasFinais = [...caracteristicasSelecionadas].filter(c => !c.startsWith('Calção:'));
+      if (form.tem_calcao) {
+        const valorCalcao = form.preco_calcao
+          ? `Calção: R$ ${form.preco_calcao}`
+          : 'Calção exigido';
+        caracteristicasFinais.push(valorCalcao);
+      }
+
       const payload = {
         corretor_id: user.id,
         titulo: form.titulo,
@@ -165,7 +180,7 @@ export default function ImovelFormPage({ modo }: Props) {
         area_total: form.area_total ? Number(form.area_total) : null,
         area_construida: form.area_construida ? Number(form.area_construida) : null,
         fotos,
-        caracteristicas: caracteristicasSelecionadas,
+        caracteristicas: caracteristicasFinais,
         publicado: form.publicado,
         destaque: form.destaque,
       };
@@ -292,6 +307,35 @@ export default function ImovelFormPage({ modo }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Calção — só aparece se finalidade for aluguel */}
+          {form.finalidade === 'aluguel' && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <label className="flex items-center gap-3 cursor-pointer mb-3">
+                <input type="checkbox" name="tem_calcao" checked={form.tem_calcao}
+                  onChange={e => setForm(p => ({ ...p, tem_calcao: e.target.checked }))}
+                  className="w-5 h-5 rounded accent-green-600" />
+                <div>
+                  <p className="font-medium text-slate-700">Exige calção</p>
+                  <p className="text-xs text-slate-500">Marque se o imóvel exige calção (caução)</p>
+                </div>
+              </label>
+              {form.tem_calcao && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor do Calção (R$)</label>
+                  <div className="relative max-w-xs">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                    <input
+                      value={form.preco_calcao}
+                      onChange={e => setForm(p => ({ ...p, preco_calcao: formatMoeda(e.target.value) }))}
+                      inputMode="numeric"
+                      className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="0,00" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Localização */}

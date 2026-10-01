@@ -1,20 +1,22 @@
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { Imovel, CorretorComPerfil } from '@/types';
-import { formatCurrency, tipoLabel, buildWhatsAppLink } from '@/lib/utils';
+import { formatCurrency, tipoLabel } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Building2, MapPin, Bed, Bath, Car, Ruler, Phone, ArrowLeft } from 'lucide-react';
-import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CatalogoCorretorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ finalidade?: string }>;
 }) {
   try {
     const { slug } = await params;
+    const { finalidade } = await searchParams;
     const supabase = await createServerSupabaseClient();
 
     const { data: corretor, error } = await supabase
@@ -36,7 +38,7 @@ export default async function CatalogoCorretorPage({
       </div>
     );
 
-    const { data: imoveis } = await supabase
+    let query = supabase
       .from('imoveis')
       .select('*')
       .eq('corretor_id', corretor.id)
@@ -44,8 +46,12 @@ export default async function CatalogoCorretorPage({
       .order('destaque', { ascending: false })
       .order('created_at', { ascending: false });
 
+    if (finalidade) query = query.eq('finalidade', finalidade);
+
+    const { data: imoveis } = await query;
     const c = corretor as CorretorComPerfil;
 
+    const total = (imoveis || []).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,8 +84,21 @@ export default async function CatalogoCorretorPage({
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* Quick filter buttons */}
+        <div className="flex gap-3 mb-6">
+          <a href={`/c/${slug}`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+            Todos
+          </a>
+          <a href={`/c/${slug}?finalidade=venda`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
+            Venda
+          </a>
+          <a href={`/c/${slug}?finalidade=aluguel`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+            Aluguel
+          </a>
+        </div>
+
         <h2 className="text-lg font-semibold text-slate-700 mb-6">
-          {(imoveis || []).length} imóveis disponíveis
+          {total} {finalidade ? (finalidade === 'venda' ? 'imóveis à venda' : 'imóveis para aluguel') : 'imóveis disponíveis'}
         </h2>
 
         {!imoveis || imoveis.length === 0 ? (
@@ -136,9 +155,8 @@ export default async function CatalogoCorretorPage({
   } catch (err: any) {
     return (
       <div className="p-10 text-center">
-        <h2>Erro Fatal na Renderização</h2>
+        <h2>Erro na Renderização</h2>
         <p className="text-red-500 font-mono text-xs">{err.message}</p>
-        <p className="text-gray-500 font-mono text-xs">{err.stack}</p>
       </div>
     );
   }
