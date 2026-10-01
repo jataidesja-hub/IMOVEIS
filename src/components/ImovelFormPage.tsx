@@ -44,6 +44,7 @@ export default function ImovelFormPage({ modo }: Props) {
     preco: '', preco_condominio: '', preco_iptu: '', preco_calcao: '',
     tem_calcao: false,
     endereco: '', numero: '', complemento: '', bairro: '', cidade: '', estado: 'SP', cep: '', link_mapa: '',
+    latitude: '', longitude: '',
     quartos: '0', suites: '0', banheiros: '0', vagas_garagem: '0',
     area_total: '', area_construida: '',
     publicado: false, destaque: false,
@@ -56,6 +57,8 @@ export default function ImovelFormPage({ modo }: Props) {
         if (!data) return;
         const calcaoItem = caracteristicas.find(c => c.startsWith('Calção:') || c === 'Calção exigido');
         const calcaoValor = calcaoItem?.startsWith('Calção: R$ ') ? calcaoItem.replace('Calção: R$ ', '') : '';
+        const linkMapaItem = caracteristicas.find(c => c.startsWith('LinkMapa:'));
+        const linkMapaValor = linkMapaItem ? linkMapaItem.substring(9) : '';
 
         setForm({
           titulo: data.titulo || '',
@@ -74,7 +77,9 @@ export default function ImovelFormPage({ modo }: Props) {
           cidade: data.cidade || '',
           estado: data.estado || 'SP',
           cep: data.cep || '',
-          link_mapa: data.link_mapa || '',
+          link_mapa: linkMapaValor,
+          latitude: data.latitude ? String(data.latitude) : '',
+          longitude: data.longitude ? String(data.longitude) : '',
           quartos: String(data.quartos),
           suites: String(data.suites),
           banheiros: String(data.banheiros),
@@ -85,7 +90,7 @@ export default function ImovelFormPage({ modo }: Props) {
           destaque: data.destaque,
         });
         setFotos(data.fotos || []);
-        setCaracteristicasSelecionadas(caracteristicas.filter(c => !c.startsWith('Calção:')));
+        setCaracteristicasSelecionadas(caracteristicas.filter(c => !c.startsWith('Calção:') && !c.startsWith('LinkMapa:')));
       });
     }
   }, [modo, params.id]);
@@ -149,19 +154,21 @@ export default function ImovelFormPage({ modo }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Não autenticado');
 
-      // Adiciona calção às caracteristicas se marcado
-      let caracteristicasFinais = [...caracteristicasSelecionadas].filter(c => !c.startsWith('Calção:'));
+      // Adiciona calção e link_mapa às caracteristicas
+      let caracteristicasFinais = [...caracteristicasSelecionadas].filter(c => !c.startsWith('Calção:') && !c.startsWith('LinkMapa:'));
       if (form.tem_calcao) {
-        const valorCalcao = form.preco_calcao
-          ? `Calção: R$ ${form.preco_calcao}`
-          : 'Calção exigido';
+        const valorCalcao = form.preco_calcao ? `Calção: R$ ${form.preco_calcao}` : 'Calção exigido';
         caracteristicasFinais.push(valorCalcao);
       }
+      if (form.link_mapa) {
+        caracteristicasFinais.push(`LinkMapa:${form.link_mapa.trim()}`);
+      }
 
-      // Auto-geocode endereço
-      let latitude: number | null = null;
-      let longitude: number | null = null;
-      if (form.endereco && form.cidade) {
+      // Lat/Lng manual ou Auto-geocode
+      let latitude: number | null = form.latitude ? parseFloat(form.latitude.replace(',', '.')) : null;
+      let longitude: number | null = form.longitude ? parseFloat(form.longitude.replace(',', '.')) : null;
+      
+      if (latitude === null && longitude === null && form.endereco && form.cidade) {
         try {
           const geoRes = await fetch('/api/geocode', {
             method: 'POST',
@@ -408,7 +415,22 @@ export default function ImovelFormPage({ modo }: Props) {
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Cole o link do Google Maps (compartilhar > copiar link)" />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Latitude Exata (opcional)</label>
+              <input name="latitude" value={form.latitude} onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="-9.398012" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Longitude Exata (opcional)</label>
+              <input name="longitude" value={form.longitude} onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="-40.501920" />
+            </div>
           </div>
+          <p className="text-xs text-slate-500 mt-4">
+            * O sistema tenta encontrar a localização no mapa automaticamente com base no endereço e cidade. Se ficar errado, você pode colar a latitude e longitude exatas acima.
+          </p>
         </div>
 
         {/* Características físicas */}

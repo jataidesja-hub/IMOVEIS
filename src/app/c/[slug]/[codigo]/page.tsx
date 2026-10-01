@@ -131,13 +131,23 @@ export default async function ImovelPublicoPage({
                       .filter(Boolean).join(', ')}
                   </span>
                 </div>
-                {im.link_mapa && (
-                  <a href={im.link_mapa.startsWith('http') ? im.link_mapa : `https://${im.link_mapa}`} 
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0">
-                    <MapPin size={14} /> Ver no Mapa
-                  </a>
-                )}
+                {(() => {
+                  let mapaLink = im.link_mapa;
+                  if (!mapaLink) {
+                    const item = (im.caracteristicas || []).find((c: string) => c.startsWith('LinkMapa:'));
+                    if (item) mapaLink = item.substring(9);
+                  }
+                  if (mapaLink) {
+                    return (
+                      <a href={mapaLink.startsWith('http') ? mapaLink : `https://${mapaLink}`} 
+                        target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0">
+                        <MapPin size={14} /> Ver no Mapa
+                      </a>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               {/* Key features */}
