@@ -79,7 +79,7 @@ export default function CorretorImoveisPage() {
           {imoveis.map(im => (
             <div key={im.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-4">
               <div className="w-24 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                {im.fotos[0]
+                {im.fotos?.[0]
                   ? <img src={im.fotos[0]} alt="" className="w-full h-full object-cover" />
                   : <Building2 size={24} className="m-auto mt-4 text-gray-300" />}
               </div>

@@ -3,15 +3,17 @@ import { Imovel, CorretorComPerfil } from '@/types';
 import { formatCurrency, tipoLabel } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Building2, MapPin, Bed, Bath, Car, Ruler, Phone } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, Car, Ruler, Map } from 'lucide-react';
+import MapaImoveisWrapper from '@/components/MapaImoveisWrapper';
 
 export default async function CatalogoGeralPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tipo?: string; finalidade?: string; cidade?: string }>;
+  searchParams: Promise<{ tipo?: string; finalidade?: string; cidade?: string; mapa?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createServerSupabaseClient();
+  const visuMapa = params.mapa === '1';
 
   let query = supabase
     .from('imoveis')
@@ -27,7 +29,33 @@ export default async function CatalogoGeralPage({
   const { data: imoveis } = await query;
   const ativos = (imoveis || []).filter((im: Imovel & { corretor: { ativo: boolean; status: string } }) =>
     im.corretor?.ativo && im.corretor?.status === 'aprovado'
-  ) as (Imovel & { corretor: CorretorComPerfil })[]; 
+  ) as (Imovel & { corretor: CorretorComPerfil })[];
+
+  // Build query string preserving current filters
+  function buildUrl(extra: Record<string, string | undefined>) {
+    const p = new URLSearchParams();
+    if (params.finalidade) p.set('finalidade', params.finalidade);
+    if (params.tipo) p.set('tipo', params.tipo);
+    if (params.cidade) p.set('cidade', params.cidade);
+    Object.entries(extra).forEach(([k, v]) => v ? p.set(k, v) : p.delete(k));
+    const s = p.toString();
+    return `/c${s ? '?' + s : ''}`;
+  }
+
+  const dadosMapa = ativos
+    .filter(im => im.latitude && im.longitude)
+    .map(im => ({
+      id: im.id,
+      titulo: im.titulo,
+      preco: im.preco,
+      finalidade: im.finalidade,
+      latitude: Number(im.latitude),
+      longitude: Number(im.longitude),
+      slug_corretor: im.corretor.slug,
+      codigo: im.codigo,
+      cidade: im.cidade,
+      estado: im.estado,
+    }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,16 +72,26 @@ export default async function CatalogoGeralPage({
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Quick filter buttons */}
-        <div className="flex gap-3 mb-4">
-          <a href="/c" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!params.finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+        {/* Filter + Map toggle row */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <a href={buildUrl({ finalidade: undefined, mapa: visuMapa ? '1' : undefined })}
+            className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!params.finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
             Todos
           </a>
-          <a href="/c?finalidade=venda" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
+          <a href={buildUrl({ finalidade: 'venda', mapa: visuMapa ? '1' : undefined })}
+            className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
             Venda
           </a>
-          <a href="/c?finalidade=aluguel" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+          <a href={buildUrl({ finalidade: 'aluguel', mapa: visuMapa ? '1' : undefined })}
+            className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
             Aluguel
+          </a>
+          {/* Spacer */}
+          <div className="flex-1" />
+          <a href={buildUrl({ mapa: visuMapa ? undefined : '1' })}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${visuMapa ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
+            <Map size={15} />
+            {visuMapa ? 'Ver Lista' : 'Ver Mapa'}
           </a>
         </div>
 
@@ -84,8 +122,10 @@ export default async function CatalogoGeralPage({
           </div>
         </form>
 
-        {/* Grid */}
-        {ativos.length === 0 ? (
+        {/* Map or Grid */}
+        {visuMapa ? (
+          <MapaImoveisWrapper imoveis={dadosMapa} />
+        ) : ativos.length === 0 ? (
           <div className="text-center py-20">
             <Building2 className="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-600">Nenhum imóvel encontrado</h3>
@@ -104,7 +144,6 @@ export default async function CatalogoGeralPage({
 }
 
 function ImovelCard({ imovel }: { imovel: Imovel & { corretor: CorretorComPerfil } }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
   return (
     <Link href={`/c/${imovel.corretor.slug}/${imovel.codigo}`}
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">

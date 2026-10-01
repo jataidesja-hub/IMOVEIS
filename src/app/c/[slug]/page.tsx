@@ -3,7 +3,8 @@ import { Imovel, CorretorComPerfil } from '@/types';
 import { formatCurrency, tipoLabel } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Building2, MapPin, Bed, Bath, Car, Ruler, Phone, ArrowLeft } from 'lucide-react';
+import { Building2, MapPin, Bed, Bath, Car, Ruler, Phone, ArrowLeft, Map } from 'lucide-react';
+import MapaImoveisWrapper from '@/components/MapaImoveisWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +13,12 @@ export default async function CatalogoCorretorPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ finalidade?: string }>;
+  searchParams: Promise<{ finalidade?: string; mapa?: string }>;
 }) {
   try {
     const { slug } = await params;
-    const { finalidade } = await searchParams;
+    const { finalidade, mapa } = await searchParams;
+    const visuMapa = mapa === '1';
     const supabase = await createServerSupabaseClient();
 
     const { data: corretor, error } = await supabase
@@ -53,6 +55,14 @@ export default async function CatalogoCorretorPage({
 
     const total = (imoveis || []).length;
 
+    const dadosMapa = (imoveis || [])
+      .filter((im: any) => im.latitude && im.longitude)
+      .map((im: any) => ({
+        id: im.id, titulo: im.titulo, preco: im.preco, finalidade: im.finalidade,
+        latitude: Number(im.latitude), longitude: Number(im.longitude),
+        slug_corretor: slug, codigo: im.codigo, cidade: im.cidade, estado: im.estado,
+      }));
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -84,16 +94,22 @@ export default async function CatalogoCorretorPage({
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Quick filter buttons */}
-        <div className="flex gap-3 mb-6">
-          <a href={`/c/${slug}`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+        {/* Quick filter buttons + Map toggle */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <a href={`/c/${slug}${visuMapa ? '?mapa=1' : ''}`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
             Todos
           </a>
-          <a href={`/c/${slug}?finalidade=venda`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
+          <a href={`/c/${slug}?finalidade=venda${visuMapa ? '&mapa=1' : ''}`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
             Venda
           </a>
-          <a href={`/c/${slug}?finalidade=aluguel`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+          <a href={`/c/${slug}?finalidade=aluguel${visuMapa ? '&mapa=1' : ''}`} className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
             Aluguel
+          </a>
+          <div className="flex-1" />
+          <a href={`/c/${slug}?${finalidade ? `finalidade=${finalidade}&` : ''}${visuMapa ? '' : 'mapa=1'}`}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${visuMapa ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
+            <Map size={15} />
+            {visuMapa ? 'Ver Lista' : 'Ver Mapa'}
           </a>
         </div>
 
@@ -101,7 +117,9 @@ export default async function CatalogoCorretorPage({
           {total} {finalidade ? (finalidade === 'venda' ? 'imóveis à venda' : 'imóveis para aluguel') : 'imóveis disponíveis'}
         </h2>
 
-        {!imoveis || imoveis.length === 0 ? (
+        {visuMapa ? (
+          <MapaImoveisWrapper imoveis={dadosMapa} />
+        ) : !imoveis || imoveis.length === 0 ? (
           <div className="text-center py-16">
             <Building2 className="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <p className="text-slate-400">Nenhum imóvel disponível no momento</p>

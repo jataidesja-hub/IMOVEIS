@@ -52,7 +52,8 @@ export default function ImovelFormPage({ modo }: Props) {
   useEffect(() => {
     if (modo === 'editar' && params.id) {
       supabase.from('imoveis').select('*').eq('id', params.id).single().then(({ data }) => {
-        const caracteristicas: string[] = data.caracteristicas || [];
+        const caracteristicas: string[] = data?.caracteristicas || [];
+        if (!data) return;
         const calcaoItem = caracteristicas.find(c => c.startsWith('Calção:') || c === 'Calção exigido');
         const calcaoValor = calcaoItem?.startsWith('Calção: R$ ') ? calcaoItem.replace('Calção: R$ ', '') : '';
 
@@ -157,6 +158,21 @@ export default function ImovelFormPage({ modo }: Props) {
         caracteristicasFinais.push(valorCalcao);
       }
 
+      // Auto-geocode endereço
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+      if (form.endereco && form.cidade) {
+        try {
+          const geoRes = await fetch('/api/geocode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endereco: form.endereco, numero: form.numero, bairro: form.bairro, cidade: form.cidade, estado: form.estado }),
+          });
+          const geoData = await geoRes.json();
+          if (geoData.lat) { latitude = geoData.lat; longitude = geoData.lon; }
+        } catch { /* silently ignore geocoding failure */ }
+      }
+
       const payload = {
         corretor_id: user.id,
         titulo: form.titulo,
@@ -179,6 +195,7 @@ export default function ImovelFormPage({ modo }: Props) {
         vagas_garagem: Number(form.vagas_garagem),
         area_total: form.area_total ? Number(form.area_total) : null,
         area_construida: form.area_construida ? Number(form.area_construida) : null,
+        ...(latitude !== null ? { latitude, longitude } : {}),
         fotos,
         caracteristicas: caracteristicasFinais,
         publicado: form.publicado,

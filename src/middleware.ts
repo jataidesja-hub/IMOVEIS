@@ -37,7 +37,8 @@ export async function middleware(request: NextRequest) {
       .select('papel')
       .eq('id', user.id)
       .single();
-    if (!perfil || perfil.papel !== 'gestor') {
+    if (!perfil) return NextResponse.redirect(new URL('/login', request.url));
+    if (perfil.papel !== 'gestor') {
       return NextResponse.redirect(new URL('/corretor', request.url));
     }
   }
@@ -51,7 +52,8 @@ export async function middleware(request: NextRequest) {
       .select('papel')
       .eq('id', user.id)
       .single();
-    if (!perfil || perfil.papel !== 'corretor') {
+    if (!perfil) return NextResponse.redirect(new URL('/login', request.url));
+    if (perfil.papel !== 'corretor') {
       return NextResponse.redirect(new URL('/gestor', request.url));
     }
   }
