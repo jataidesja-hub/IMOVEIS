@@ -8,6 +8,18 @@ import toast from 'react-hot-toast';
 import { Loader2, Save, ArrowLeft, Upload, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+// Formata número como BRL ao digitar: "150000" → "1.500,00"
+function formatMoeda(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10) / 100;
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+}
+// Converte BRL formatado de volta para número puro
+function parseMoeda(formatted: string): string {
+  return formatted.replace(/\./g, '').replace(',', '.');
+}
+
 const CARACTERISTICAS_PADRAO = [
   'Piscina', 'Churrasqueira', 'Academia', 'Portaria 24h', 'Elevador',
   'Ar condicionado', 'Varanda', 'Quintal', 'Jardim', 'Gerador',
@@ -45,9 +57,9 @@ export default function ImovelFormPage({ modo }: Props) {
           descricao: data.descricao || '',
           tipo: data.tipo,
           finalidade: data.finalidade,
-          preco: String(data.preco),
-          preco_condominio: data.preco_condominio ? String(data.preco_condominio) : '',
-          preco_iptu: data.preco_iptu ? String(data.preco_iptu) : '',
+          preco: data.preco ? formatMoeda(String(Math.round(data.preco * 100))) : '',
+          preco_condominio: data.preco_condominio ? formatMoeda(String(Math.round(data.preco_condominio * 100))) : '',
+          preco_iptu: data.preco_iptu ? formatMoeda(String(Math.round(data.preco_iptu * 100))) : '',
           endereco: data.endereco || '',
           numero: data.numero || '',
           complemento: data.complemento || '',
@@ -136,9 +148,9 @@ export default function ImovelFormPage({ modo }: Props) {
         descricao: form.descricao,
         tipo: form.tipo,
         finalidade: form.finalidade,
-        preco: Number(form.preco),
-        preco_condominio: form.preco_condominio ? Number(form.preco_condominio) : null,
-        preco_iptu: form.preco_iptu ? Number(form.preco_iptu) : null,
+        preco: parseFloat(parseMoeda(form.preco)) || 0,
+        preco_condominio: form.preco_condominio ? parseFloat(parseMoeda(form.preco_condominio)) : null,
+        preco_iptu: form.preco_iptu ? parseFloat(parseMoeda(form.preco_iptu)) : null,
         endereco: form.endereco,
         numero: form.numero,
         complemento: form.complemento,
@@ -146,7 +158,6 @@ export default function ImovelFormPage({ modo }: Props) {
         cidade: form.cidade,
         estado: form.estado,
         cep: form.cep,
-        link_mapa: form.link_mapa,
         quartos: Number(form.quartos),
         suites: Number(form.suites),
         banheiros: Number(form.banheiros),
@@ -243,21 +254,42 @@ export default function ImovelFormPage({ modo }: Props) {
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 {form.finalidade === 'aluguel' ? 'Valor do Aluguel (R$) *' : 'Preço de Venda (R$) *'}
               </label>
-              <input name="preco" type="number" required min="0" value={form.preco} onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="250000" />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                <input
+                  name="preco" required
+                  value={form.preco}
+                  onChange={e => setForm(p => ({ ...p, preco: formatMoeda(e.target.value) }))}
+                  inputMode="numeric"
+                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="0,00" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Condomínio (R$)</label>
-              <input name="preco_condominio" type="number" min="0" value={form.preco_condominio} onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="500" />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                <input
+                  name="preco_condominio"
+                  value={form.preco_condominio}
+                  onChange={e => setForm(p => ({ ...p, preco_condominio: formatMoeda(e.target.value) }))}
+                  inputMode="numeric"
+                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="0,00" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">IPTU anual (R$)</label>
-              <input name="preco_iptu" type="number" min="0" value={form.preco_iptu} onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="1200" />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                <input
+                  name="preco_iptu"
+                  value={form.preco_iptu}
+                  onChange={e => setForm(p => ({ ...p, preco_iptu: formatMoeda(e.target.value) }))}
+                  inputMode="numeric"
+                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="0,00" />
+              </div>
             </div>
           </div>
         </div>

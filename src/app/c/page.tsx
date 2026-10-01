@@ -44,6 +44,19 @@ export default async function CatalogoGeralPage({
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Quick filter buttons */}
+        <div className="flex gap-3 mb-4">
+          <a href="/c" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${!params.finalidade ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+            Todos
+          </a>
+          <a href="/c?finalidade=venda" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'venda' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>
+            Venda
+          </a>
+          <a href="/c?finalidade=aluguel" className={`px-5 py-2 rounded-full font-semibold text-sm transition-colors border ${params.finalidade === 'aluguel' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>
+            Aluguel
+          </a>
+        </div>
+
         {/* Filters */}
         <form className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
