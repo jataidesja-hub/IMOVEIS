@@ -52,7 +52,10 @@ export default function ImovelFormPage({ modo }: Props) {
   useEffect(() => {
     if (modo === 'editar' && params.id) {
       supabase.from('imoveis').select('*').eq('id', params.id).single().then(({ data }) => {
-        if (!data) return;
+        const caracteristicas: string[] = data.caracteristicas || [];
+        const calcaoItem = caracteristicas.find(c => c.startsWith('Calção:') || c === 'Calção exigido');
+        const calcaoValor = calcaoItem?.startsWith('Calção: R$ ') ? calcaoItem.replace('Calção: R$ ', '') : '';
+
         setForm({
           titulo: data.titulo || '',
           descricao: data.descricao || '',
@@ -61,6 +64,8 @@ export default function ImovelFormPage({ modo }: Props) {
           preco: data.preco ? formatMoeda(String(Math.round(data.preco * 100))) : '',
           preco_condominio: data.preco_condominio ? formatMoeda(String(Math.round(data.preco_condominio * 100))) : '',
           preco_iptu: data.preco_iptu ? formatMoeda(String(Math.round(data.preco_iptu * 100))) : '',
+          preco_calcao: calcaoValor,
+          tem_calcao: !!calcaoItem,
           endereco: data.endereco || '',
           numero: data.numero || '',
           complemento: data.complemento || '',
@@ -78,13 +83,8 @@ export default function ImovelFormPage({ modo }: Props) {
           publicado: data.publicado,
           destaque: data.destaque,
         });
-        const caracteristicas = data.caracteristicas || [];
-        const calcaoItem = caracteristicas.find((c: string) => c.startsWith('Calção:') || c === 'Calção exigido');
-        const calcaoValor = calcaoItem?.startsWith('Calção: R$ ') ? calcaoItem.replace('Calção: R$ ', '') : '';
-
         setFotos(data.fotos || []);
-        setCaracteristicasSelecionadas(caracteristicas.filter((c: string) => !c.startsWith('Calção:')));
-        setForm(prev => ({ ...prev, tem_calcao: !!calcaoItem, preco_calcao: calcaoValor }));
+        setCaracteristicasSelecionadas(caracteristicas.filter(c => !c.startsWith('Calção:')));
       });
     }
   }, [modo, params.id]);
