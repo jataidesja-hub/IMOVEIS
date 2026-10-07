@@ -15,8 +15,9 @@ export async function generateMetadata({
     .eq('slug', slug)
     .single();
 
-  const nome = corretor?.perfil?.nome || 'Corretor';
-  const iconUrl = corretor?.foto_perfil || '/icon-192x192.png';
+  const corretorData = corretor as any;
+  const nome = corretorData?.perfil?.nome || 'Corretor';
+  const iconUrl = corretorData?.foto_perfil || '/icon-192x192.png';
 
   return {
     title: `${nome} | Imóveis`,

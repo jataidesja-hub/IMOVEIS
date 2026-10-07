@@ -14,9 +14,10 @@ export async function GET(
     .eq('slug', slug)
     .single();
 
-  const nome = corretor?.perfil?.nome || 'Imóveis';
+  const corretorData = corretor as any;
+  const nome = corretorData?.perfil?.nome || 'Imóveis';
   const shortName = nome.split(' ')[0] || 'Imóveis';
-  const iconUrl = corretor?.foto_perfil || '/icon-192x192.png'; // fallback se não tiver
+  const iconUrl = corretorData?.foto_perfil || '/icon-192x192.png'; // fallback se não tiver
 
   const manifest = {
     name: `Imóveis - ${nome}`,
