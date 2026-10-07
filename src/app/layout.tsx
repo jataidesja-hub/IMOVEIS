@@ -3,18 +3,21 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Watermark from '@/components/Watermark';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'ImóveisApp - Plataforma para Corretores',
   description: 'Plataforma completa para corretores de imóveis publicarem e gerenciarem seus imóveis.',
+  manifest: '/manifest.json', // Global fallback
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
+        <ServiceWorkerRegister />
         {children}
         <Watermark />
         <Toaster
